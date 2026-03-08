@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] — 2026-03-09
+
+### Fixed
+
+- **hassfest validation** — added `frontend` and `http` to `dependencies` in `manifest.json` (required because the integration imports from `homeassistant.components.frontend` and `homeassistant.components.http` for custom Lovelace card registration)
+
+---
+
 ## [0.4.2] — 2026-03-09
 
 ### Fixed
