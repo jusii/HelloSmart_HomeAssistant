@@ -40,10 +40,17 @@ async def _unlock_doors(coordinator: SmartDataCoordinator, vin: str) -> None:
 
 
 def _doors_locked(data: VehicleData) -> bool | None:
-    if not data.status.doors:
+    locks = [
+        data.status.door_lock_driver,
+        data.status.door_lock_passenger,
+        data.status.door_lock_driver_rear,
+        data.status.door_lock_passenger_rear,
+    ]
+    available = [v for v in locks if v is not None]
+    if not available:
         return None
-    # All doors closed = locked (door values: True=open, False=closed)
-    return not any(data.status.doors.values())
+    # door_lock values: 1 = locked, 0 = unlocked
+    return all(v == 1 for v in available)
 
 
 async def _lock_locker(coordinator: SmartDataCoordinator, vin: str) -> None:
@@ -66,7 +73,15 @@ LOCK_DESCRIPTIONS: tuple[SmartLockEntityDescription, ...] = (
         lock_fn=_lock_doors,
         unlock_fn=_unlock_doors,
         is_locked_fn=_doors_locked,
-        available_fn=lambda data: bool(data.status.doors),
+        available_fn=lambda data: any(
+            v is not None
+            for v in (
+                data.status.door_lock_driver,
+                data.status.door_lock_passenger,
+                data.status.door_lock_driver_rear,
+                data.status.door_lock_passenger_rear,
+            )
+        ),
     ),
     SmartLockEntityDescription(
         key="smart_trunk_locker",

@@ -80,6 +80,7 @@ class Account:
     api_refresh_token: str = ""
     api_user_id: str = ""
     api_client_id: str = ""  # INTL only
+    id_token: str = ""  # INTL only — Xs-Auth-Token for VC endpoints
     expires_at: datetime | None = None
     state: AuthState = AuthState.UNAUTHENTICATED
 
@@ -102,6 +103,28 @@ class Vehicle:
     model_year: str = ""
     series_code: str = ""
     base_url: str = ""
+    # Extended fields from list-vehicles API
+    color_name: str = ""
+    color_code: str = ""
+    model_code: str = ""
+    factory_code: str = ""
+    vehicle_photo_small: str = ""
+    vehicle_photo_big: str = ""
+    plate_no: str = ""
+    engine_no: str = ""
+    mat_code: str = ""
+    series_name: str = ""
+    vehicle_type: str = ""
+    fuel_tank_capacity: str = ""
+    ihu_platform: str = ""
+    tbox_platform: str = ""
+    default_vehicle: bool = False
+    share_status: str = ""
+    iccid: str = ""
+    msisdn: str = ""
+    tem_id: str = ""
+    ihu_id: str = ""
+    tem_type: str = ""
 
 
 @dataclass
@@ -231,6 +254,9 @@ class VehicleStatus:
     exterior_pm25_level: int | None = None
     relative_humidity: int | None = None
 
+    # ── GPS additional ─────────────────────────────────────────────────
+    altitude: float | None = None
+
     # ── EV additional ───────────────────────────────────────────────────
     range_at_full_charge: float | None = None
     average_power_consumption: float | None = None
@@ -281,6 +307,9 @@ class VehicleRunningState:
 
     power_mode: PowerMode = PowerMode.OFF
     speed: float = 0.0
+    engine_status: str = ""
+    usage_mode: str = ""
+    car_mode: str = ""
 
 
 @dataclass
@@ -296,6 +325,9 @@ class TripJournal:
     max_speed: float | None = None
     start_time: datetime | None = None
     end_time: datetime | None = None
+    regenerated_energy: float | None = None
+    start_address: str = ""
+    end_address: str = ""
 
 
 @dataclass
@@ -312,6 +344,7 @@ class ChargingReservation:
 class ClimateSchedule:
     """Climate pre-conditioning schedule."""
 
+    schedule_id: str = ""
     enabled: bool = False
     scheduled_time: str = ""
     temperature: float | None = None
@@ -342,6 +375,7 @@ class VtmSettings:
     enabled: bool = False
     notification_enabled: bool = False
     geofence_alert_enabled: bool = False
+    movement_alert_enabled: bool = False
 
 
 @dataclass
@@ -404,6 +438,31 @@ class EnergyRanking:
 
 
 @dataclass
+@dataclass
+class VehicleAbility:
+    """Vehicle ability/visual configuration from vc/vehicle/v1/ability endpoint."""
+
+    images_path: str = ""
+    top_images_path: str = ""
+    battery_images_path: str = ""
+    interior_images_path: str = ""
+    color_code: str = ""
+    color_name_mss: str = ""
+    contrast_color_code: str = ""
+    contrast_color_name: str = ""
+    interior_color_name: str = ""
+    hub_code: str = ""
+    hub_name: str = ""
+    model_code_mss: str = ""
+    model_code_vdp: str = ""
+    model_name: str = ""
+    vehicle_name: str = ""
+    vehicle_nickname: str = ""
+    side_logo_light_name: str = ""
+    license_plate_number: str = ""
+
+
+@dataclass
 class CommandResult:
     """Outcome of a single vehicle command."""
 
@@ -434,6 +493,10 @@ class VehicleData:
     diagnostic: DiagnosticEntry | None = None
     energy_ranking: EnergyRanking | None = None
     total_distance: float | None = None
+    total_distance_update_time: datetime | None = None
+    total_trips: int | None = None
     locker_secret: LockerSecret | None = None
     fota_notification: FOTANotification | None = None
+    ability: VehicleAbility | None = None
+    vehicle_image_path: str = ""
     last_command_time: datetime | None = None

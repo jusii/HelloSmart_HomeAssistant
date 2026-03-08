@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 import aiohttp
 
-from .auth import AuthenticationError, build_signed_headers
+from .auth import AuthenticationError, build_signed_headers, build_vc_signed_headers
 from .const import (
     API_CHARGING_RESERVATION_PATH,
     API_CLIMATE_SCHEDULE_PATH,
@@ -18,9 +18,12 @@ from .const import (
     API_CODE_TOKEN_EXPIRED,
     API_CODE_VEHICLE_NOT_LINKED,
     API_TELEMATICS_COMMAND_PATH,
+    API_VC_ABILITY_PATH,
     EU_API_BASE_URL,
     OTA_BASE_URL,
     URL_ALLOWLIST,
+    VC_EU_BASE_URL,
+    VC_INTL_BASE_URL,
 )
 from .models import (
     Account,
@@ -42,6 +45,7 @@ from .models import (
     TelematicsStatus,
     TripJournal,
     Vehicle,
+    VehicleAbility,
     VehicleCapabilities,
     VehicleData,
     VehicleRunningState,
@@ -150,6 +154,27 @@ class SmartAPI:
                 model_year=item.get("modelYear", ""),
                 series_code=item.get("seriesCodeVs", ""),
                 base_url=base_url,
+                color_name=item.get("colorName", ""),
+                color_code=item.get("colorCode", ""),
+                model_code=item.get("modelCode", ""),
+                factory_code=item.get("factoryCode", ""),
+                vehicle_photo_small=item.get("vehiclePhotoSmall", ""),
+                vehicle_photo_big=item.get("vehiclePhotoBig", ""),
+                plate_no=item.get("plateNo", ""),
+                engine_no=item.get("engineNo", ""),
+                mat_code=item.get("matCode", ""),
+                series_name=item.get("seriesName", ""),
+                vehicle_type=item.get("vehicleType", ""),
+                fuel_tank_capacity=item.get("fuelTankCapacity", ""),
+                ihu_platform=item.get("ihuPlatform", ""),
+                tbox_platform=item.get("tboxPlatform", ""),
+                default_vehicle=bool(item.get("defaultVehicle", False)),
+                share_status=item.get("shareStatus", ""),
+                iccid=item.get("iccid", ""),
+                msisdn=item.get("msisdn", ""),
+                tem_id=item.get("temId", ""),
+                ihu_id=item.get("ihuId", ""),
+                tem_type=item.get("temType", ""),
             )
             vehicles.append(vehicle)
 
@@ -219,6 +244,32 @@ class SmartAPI:
                 result["target_soc"] = int(d["soc"]) // 10
             except (ValueError, TypeError):
                 pass
+        # Capture all other SOC endpoint fields
+        if d.get("chargeUAct"):
+            try:
+                result["charge_voltage"] = float(d["chargeUAct"])
+            except (ValueError, TypeError):
+                pass
+        if d.get("chargeIAct"):
+            try:
+                result["charge_current"] = float(d["chargeIAct"])
+            except (ValueError, TypeError):
+                pass
+        if d.get("timeToFullyCharged"):
+            try:
+                result["time_to_full"] = int(d["timeToFullyCharged"])
+            except (ValueError, TypeError):
+                pass
+        if d.get("chargeLevel"):
+            try:
+                result["charge_level"] = int(d["chargeLevel"])
+            except (ValueError, TypeError):
+                pass
+        if d.get("chargerState"):
+            try:
+                result["charger_state"] = int(d["chargerState"])
+            except (ValueError, TypeError):
+                pass
         return result
 
     async def async_get_ota_info(
@@ -257,6 +308,9 @@ class SmartAPI:
         return VehicleRunningState(
             power_mode=power_mode_from_api(d.get("powerMode", "0")),
             speed=float(d.get("speed", 0) or 0),
+            engine_status=d.get("engineStatus", ""),
+            usage_mode=d.get("usageMode", ""),
+            car_mode=d.get("carMode", ""),
         )
 
     async def async_get_telematics(
@@ -351,6 +405,7 @@ class SmartAPI:
             return None
         s = schedules[0]
         return ClimateSchedule(
+            schedule_id=s.get("scheduleId", ""),
             enabled=bool(s.get("enabled", False)),
             scheduled_time=s.get("scheduledTime", ""),
             temperature=float(s["temperature"]) if s.get("temperature") else None,
@@ -396,6 +451,7 @@ class SmartAPI:
             enabled=bool(d.get("vtmEnabled", False)),
             notification_enabled=bool(d.get("notificationEnabled", False)),
             geofence_alert_enabled=bool(d.get("geofenceAlertEnabled", False)),
+            movement_alert_enabled=bool(d.get("movementAlertEnabled", False)),
         )
 
     async def async_get_fragrance(
@@ -414,14 +470,24 @@ class SmartAPI:
 
     async def async_get_trip_journal(
         self, account: Account, vin: str
-    ) -> TripJournal | None:
-        """Fetch most recent trip from journal."""
+    ) -> tuple[TripJournal | None, int | None]:
+        """Fetch most recent trip from journal.
+
+        Returns a tuple of (trip, total_trips).
+        """
         base_url = self._get_base_url(account)
         url = f"{base_url}/geelyTCAccess/tcservices/vehicle/status/journalLogV4/{vin}"
         data = await self._signed_request("GET", url, account)
-        logs = data.get("data", {}).get("journalLogs", [])
+        journal_data = data.get("data", {})
+        logs = journal_data.get("journalLogs", [])
+        total_trips = None
+        if journal_data.get("totalTrips"):
+            try:
+                total_trips = int(journal_data["totalTrips"])
+            except (ValueError, TypeError):
+                pass
         if not logs:
-            return None
+            return None, total_trips
         t = logs[0]
         start_time = None
         end_time = None
@@ -435,7 +501,7 @@ class SmartAPI:
                 end_time = datetime.fromtimestamp(int(t["endTime"]) / 1000)
             except (ValueError, TypeError, OSError):
                 pass
-        return TripJournal(
+        trip = TripJournal(
             trip_id=t.get("tripId", ""),
             distance=float(t["distance"]) if t.get("distance") else None,
             duration=int(t["duration"]) if t.get("duration") else None,
@@ -445,22 +511,36 @@ class SmartAPI:
             max_speed=float(t["maxSpeed"]) if t.get("maxSpeed") else None,
             start_time=start_time,
             end_time=end_time,
+            regenerated_energy=float(t["regeneratedEnergy"]) if t.get("regeneratedEnergy") else None,
+            start_address=t.get("startAddress", ""),
+            end_address=t.get("endAddress", ""),
         )
+        return trip, total_trips
 
     async def async_get_total_distance(
         self, account: Account, vin: str
-    ) -> float | None:
-        """Fetch total distance from TC endpoint."""
+    ) -> tuple[float | None, datetime | None]:
+        """Fetch total distance from TC endpoint.
+
+        Returns a tuple of (distance, update_time).
+        """
         base_url = self._get_base_url(account)
         url = f"{base_url}/geelyTCAccess/tcservices/vehicle/status/getTotalDistanceByLabel/{vin}"
         data = await self._signed_request("GET", url, account)
         d = data.get("data", {})
+        distance = None
+        update_time = None
         if d.get("totalDistance"):
             try:
-                return float(d["totalDistance"])
+                distance = float(d["totalDistance"])
             except (ValueError, TypeError):
                 pass
-        return None
+        if d.get("updateTime"):
+            try:
+                update_time = datetime.fromtimestamp(int(d["updateTime"]) / 1000)
+            except (ValueError, TypeError, OSError):
+                pass
+        return distance, update_time
 
     async def async_get_geofences(
         self, account: Account, vin: str
@@ -661,6 +741,164 @@ class SmartAPI:
         return EU_API_BASE_URL
 
     @staticmethod
+    def _get_vc_base_url(account: Account) -> str:
+        """Get the Vehicle Services (VC) base URL for ability/image endpoints."""
+        if account.region == Region.EU:
+            return VC_EU_BASE_URL
+        return VC_INTL_BASE_URL
+
+    async def async_get_vehicle_ability(
+        self, account: Account, vin: str, model_code: str
+    ) -> VehicleAbility | None:
+        """Fetch vehicle ability data including image URLs.
+
+        Calls the vc/vehicle/v1/ability/{modelCode}/{vin} endpoint.
+        For INTL: sg-app-api.smart.com uses Alibaba Cloud API Gateway HmacSHA256.
+        For EU: vehicle.vbs.srv.smart.com uses api_access_token directly.
+        """
+        if not model_code:
+            _LOGGER.debug("No model_code for %s, skipping ability fetch", vin[:6] + "...")
+            return None
+
+        vc_base = self._get_vc_base_url(account)
+        url = f"{vc_base}{API_VC_ABILITY_PATH}/{model_code}/{vin}"
+
+        _LOGGER.debug("Fetching vehicle ability: %s", url)
+
+        self._validate_url(url)
+
+        if account.region == Region.INTL:
+            headers = build_vc_signed_headers("GET", url, account)
+        else:
+            # EU VC endpoint uses api_access_token
+            headers = {
+                "x-smart-id": account.api_user_id,
+                "authorization": account.api_access_token,
+                "accept": "application/json",
+                "content-type": "application/json",
+            }
+
+        async with self._session.request("GET", url, headers=headers) as resp:
+            if resp.status == 401:
+                raise TokenExpiredError("HTTP 401 from VC ability endpoint")
+            if resp.status == 429:
+                retry_after = int(resp.headers.get("Retry-After", "60"))
+                raise RateLimitedError(retry_after)
+            if resp.status != 200:
+                body = await resp.text()
+                ca_error = resp.headers.get("x-ca-error-message", "")
+                _LOGGER.debug(
+                    "VC ability endpoint returned %d for %s: ca_error=%s body=%s",
+                    resp.status, vin[:6] + "...", ca_error, body[:500],
+                )
+                return None
+            data = await resp.json()
+
+        code = data.get("code")
+        try:
+            code = int(code) if code is not None else None
+        except (ValueError, TypeError):
+            pass
+        if code not in (API_CODE_SUCCESS, 200):
+            _LOGGER.debug("VC ability API returned code %s", code)
+            return None
+
+        # VC ability uses "result" key (not "data" like other endpoints)
+        result = data.get("result") or data.get("data") or {}
+        vsc = result.get("vscData") or {}
+        _LOGGER.debug(
+            "VC ability: imagesPath=%s, model=%s, color=%s",
+            vsc.get("imagesPath", "")[:80] if vsc.get("imagesPath") else "none",
+            vsc.get("modelName", ""),
+            vsc.get("colorNameMss", ""),
+        )
+        _LOGGER.debug(
+            "VC ability images: top=%s, interior=%s, battery=%s",
+            vsc.get("topImagesPath", "")[:80] if vsc.get("topImagesPath") else "none",
+            vsc.get("interiorImagesPath", "")[:80] if vsc.get("interiorImagesPath") else "none",
+            vsc.get("batteryImagesPath", "")[:80] if vsc.get("batteryImagesPath") else "none",
+        )
+
+        return VehicleAbility(
+            images_path=vsc.get("imagesPath", ""),
+            top_images_path=vsc.get("topImagesPath", ""),
+            battery_images_path=vsc.get("batteryImagesPath", ""),
+            interior_images_path=vsc.get("interiorImagesPath", ""),
+            color_code=vsc.get("colorCode", ""),
+            color_name_mss=vsc.get("colorNameMss", ""),
+            contrast_color_code=vsc.get("contrastColorCode", ""),
+            contrast_color_name=vsc.get("contrastColorNameMSS", ""),
+            interior_color_name=vsc.get("interiorColorNameMss", ""),
+            hub_code=vsc.get("hubCode", ""),
+            hub_name=vsc.get("hubNameMSS", ""),
+            model_code_mss=vsc.get("modelCodeMss", ""),
+            model_code_vdp=vsc.get("modelCodeVdp", ""),
+            model_name=vsc.get("modelName", ""),
+            vehicle_name=vsc.get("vehicleName", ""),
+            vehicle_nickname=vsc.get("vehicleNickname", ""),
+            side_logo_light_name=vsc.get("sideLogoLightNameMSS", ""),
+            license_plate_number=vsc.get("licensePlateNumber", ""),
+        )
+
+    async def async_download_image(
+        self, url: str, dest_path: str
+    ) -> bool:
+        """Download an image from a URL to a local file path.
+
+        Only downloads if the file doesn't already exist.
+        Returns True if the file exists (downloaded or already present).
+        """
+        import asyncio
+        import os
+
+        if await asyncio.to_thread(os.path.exists, dest_path):
+            return True
+
+        if not url:
+            return False
+
+        parsed = urlparse(url)
+        if parsed.scheme != "https":
+            _LOGGER.debug("Refusing non-HTTPS image URL: %s", url[:60])
+            return False
+
+        self._validate_url(url)
+
+        try:
+            async with self._session.get(
+                url,
+                timeout=aiohttp.ClientTimeout(total=30),
+            ) as resp:
+                if resp.status != 200:
+                    _LOGGER.debug("Image download failed: HTTP %d from %s", resp.status, url[:60])
+                    return False
+
+                content_type = resp.headers.get("Content-Type", "")
+                if not content_type.startswith(("image/", "application/octet-stream")):
+                    _LOGGER.debug("Unexpected content-type for image: %s", content_type)
+                    return False
+
+                content = await resp.read()
+
+                # Size guard: reject files > 10 MB
+                if len(content) > 10 * 1024 * 1024:
+                    _LOGGER.warning("Image too large (%d bytes), skipping", len(content))
+                    return False
+
+                def _write_file() -> None:
+                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                    with open(dest_path, "wb") as f:
+                        f.write(content)
+
+                await asyncio.to_thread(_write_file)
+
+            _LOGGER.debug("Downloaded vehicle image to %s", dest_path)
+            return True
+        except Exception:
+            _LOGGER.debug("Failed to download image from %s", url[:60], exc_info=True)
+            return False
+
+    @staticmethod
     def _parse_vehicle_status(
         additional_status: dict, raw_data: dict
     ) -> VehicleStatus:
@@ -702,6 +940,7 @@ class SmartAPI:
         gps_data = running_status.get("gpsInformation", {})
         latitude = None
         longitude = None
+        altitude = None
         if gps_data:
             try:
                 lat = float(gps_data.get("latitude", 0))
@@ -709,6 +948,12 @@ class SmartAPI:
                 if -90 <= lat <= 90 and -180 <= lon <= 180 and (lat != 0 or lon != 0):
                     latitude = lat
                     longitude = lon
+            except (ValueError, TypeError):
+                pass
+            try:
+                alt_raw = gps_data.get("altitude")
+                if alt_raw is not None:
+                    altitude = float(alt_raw)
             except (ValueError, TypeError):
                 pass
 
@@ -940,6 +1185,7 @@ class SmartAPI:
             climate_active=climate_active,
             latitude=latitude,
             longitude=longitude,
+            altitude=altitude,
             last_updated=last_updated,
             tyre_pressure_fl=tyre_pressure_fl,
             tyre_pressure_fr=tyre_pressure_fr,

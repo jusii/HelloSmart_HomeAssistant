@@ -1,0 +1,303 @@
+# Smart Vehicle Dashboard (Basic)
+# Uses only built-in Home Assistant cards — no HACS required.
+#
+# CUSTOMIZATION:
+#   1. Find and replace "234118" with your vehicle's last 6 VIN digits.
+#   2. Find and replace "HESCA2C42RS234118" with your full VIN.
+# Example: VIN WMEEJ9AA1NR123456 → replace "234118" with "123456" and full VIN with yours.
+
+title: Smart Vehicle (Basic)
+views:
+  - title: Smart Vehicle (Basic)
+    path: smart-vehicle-basic
+    cards:
+      # ──────────────────────────────────────────────
+      # Hero Card — Vehicle Overview with Image
+      # ──────────────────────────────────────────────
+      - type: picture-entity
+        entity: binary_sensor.smart_234118_telematics_connected
+        name: Smart #3
+        image: /local/hello_smart/HESCA2C42RS234118_side.png
+        show_name: true
+        show_state: true
+      - type: entities
+        title: Vehicle Status
+        entities:
+          - entity: lock.smart_234118_smart_door_lock
+            name: Door Lock
+            icon: mdi:lock
+          - entity: sensor.smart_234118_charging_status
+            name: Charging Status
+            icon: mdi:ev-station
+          - entity: sensor.smart_234118_power_mode
+            name: Power Mode
+            icon: mdi:power
+          - entity: binary_sensor.smart_234118_telematics_connected
+            name: Online
+            icon: mdi:wifi
+
+      # ──────────────────────────────────────────────
+      # Battery & Range
+      # ──────────────────────────────────────────────
+      - type: gauge
+        entity: sensor.smart_234118_battery_level
+        name: Battery Level
+        min: 0
+        max: 100
+        severity:
+          green: 60
+          yellow: 20
+          red: 0
+      - type: entities
+        title: Range
+        entities:
+          - entity: sensor.smart_234118_range_remaining
+            name: Range Remaining
+            icon: mdi:map-marker-distance
+          - entity: sensor.smart_234118_range_at_full_charge
+            name: Range at Full Charge
+            icon: mdi:map-marker-check
+
+      # ──────────────────────────────────────────────
+      # Charging Status
+      # ──────────────────────────────────────────────
+      - type: entities
+        title: Charging
+        entities:
+          - entity: sensor.smart_234118_charging_status
+            name: Status
+            icon: mdi:ev-station
+          - entity: binary_sensor.smart_234118_charger_connected
+            name: Charger Connected
+            icon: mdi:power-plug
+          - entity: binary_sensor.smart_234118_charge_lid_ac
+            name: AC Charge Lid
+            icon: mdi:ev-plug-type2
+          - entity: binary_sensor.smart_234118_charge_lid_dc
+            name: DC Charge Lid
+            icon: mdi:ev-plug-ccs2
+          - entity: sensor.smart_234118_charge_voltage
+            name: Voltage
+            icon: mdi:flash
+          - entity: sensor.smart_234118_charge_current
+            name: AC Current
+            icon: mdi:current-ac
+          - entity: sensor.smart_234118_dc_charge_current
+            name: DC Current
+            icon: mdi:current-dc
+          - entity: sensor.smart_234118_charging_power
+            name: Power
+            icon: mdi:lightning-bolt
+          - entity: sensor.smart_234118_time_to_full
+            name: Time to Full
+            icon: mdi:timer-sand
+      - type: entities
+        title: Charging Controls
+        entities:
+          - entity: number.smart_234118_smart_target_soc
+            name: Target SOC
+            icon: mdi:battery-charging-high
+          - entity: sensor.smart_234118_charging_schedule_status
+            name: Schedule Status
+            icon: mdi:calendar-clock
+          - entity: sensor.smart_234118_charging_target_soc
+            name: Schedule Target SOC
+            icon: mdi:battery-heart
+          - entity: time.smart_234118_smart_charging_start
+            name: Charging Start Time
+            icon: mdi:clock-start
+          - entity: time.smart_234118_smart_charging_end
+            name: Charging End Time
+            icon: mdi:clock-end
+          - entity: switch.smart_234118_smart_charging
+            name: Charging
+            icon: mdi:ev-station
+
+      # ──────────────────────────────────────────────
+      # Lock & Security
+      # ──────────────────────────────────────────────
+      - type: entities
+        title: Lock & Security
+        entities:
+          - entity: lock.smart_234118_smart_door_lock
+            name: Door Lock
+            icon: mdi:lock
+          - entity: binary_sensor.smart_234118_driver_door
+            name: Driver Door
+            icon: mdi:car-door
+          - entity: binary_sensor.smart_234118_passenger_door
+            name: Passenger Door
+            icon: mdi:car-door
+          - entity: binary_sensor.smart_234118_rear_left_door
+            name: Rear Left Door
+            icon: mdi:car-door
+          - entity: binary_sensor.smart_234118_rear_right_door
+            name: Rear Right Door
+            icon: mdi:car-door
+          - entity: binary_sensor.smart_234118_trunk
+            name: Trunk
+            icon: mdi:car-back
+          - entity: binary_sensor.smart_234118_engine_hood
+            name: Engine Hood
+            icon: mdi:car
+          - entity: binary_sensor.smart_234118_door_lock_driver
+            name: Driver Lock
+            icon: mdi:car-door-lock
+          - entity: binary_sensor.smart_234118_door_lock_passenger
+            name: Passenger Lock
+            icon: mdi:car-door-lock
+          - entity: binary_sensor.smart_234118_door_lock_rear_left
+            name: Rear Left Lock
+            icon: mdi:car-door-lock
+          - entity: binary_sensor.smart_234118_door_lock_rear_right
+            name: Rear Right Lock
+            icon: mdi:car-door-lock
+          - entity: binary_sensor.smart_234118_trunk_locked
+            name: Trunk Lock
+            icon: mdi:lock
+
+      # ──────────────────────────────────────────────
+      # Tyre Status
+      # ──────────────────────────────────────────────
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Tyre Status"
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                title: Front Left
+                entities:
+                  - entity: sensor.smart_234118_tyre_pressure_fl
+                    name: Pressure
+                    icon: mdi:tire
+                  - entity: sensor.smart_234118_tyre_temp_fl
+                    name: Temperature
+                    icon: mdi:thermometer
+                  - entity: binary_sensor.smart_234118_tyre_warning_fl
+                    name: Warning
+                    icon: mdi:alert
+              - type: entities
+                title: Front Right
+                entities:
+                  - entity: sensor.smart_234118_tyre_pressure_fr
+                    name: Pressure
+                    icon: mdi:tire
+                  - entity: sensor.smart_234118_tyre_temp_fr
+                    name: Temperature
+                    icon: mdi:thermometer
+                  - entity: binary_sensor.smart_234118_tyre_warning_fr
+                    name: Warning
+                    icon: mdi:alert
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                title: Rear Left
+                entities:
+                  - entity: sensor.smart_234118_tyre_pressure_rl
+                    name: Pressure
+                    icon: mdi:tire
+                  - entity: sensor.smart_234118_tyre_temp_rl
+                    name: Temperature
+                    icon: mdi:thermometer
+                  - entity: binary_sensor.smart_234118_tyre_warning_rl
+                    name: Warning
+                    icon: mdi:alert
+              - type: entities
+                title: Rear Right
+                entities:
+                  - entity: sensor.smart_234118_tyre_pressure_rr
+                    name: Pressure
+                    icon: mdi:tire
+                  - entity: sensor.smart_234118_tyre_temp_rr
+                    name: Temperature
+                    icon: mdi:thermometer
+                  - entity: binary_sensor.smart_234118_tyre_warning_rr
+                    name: Warning
+                    icon: mdi:alert
+
+      # ──────────────────────────────────────────────
+      # Windows
+      # ──────────────────────────────────────────────
+      - type: entities
+        title: Windows
+        entities:
+          - entity: binary_sensor.smart_234118_driver_window
+            name: Driver Window
+            icon: mdi:car-door
+          - entity: sensor.smart_234118_window_position_driver
+            name: Driver Position
+            icon: mdi:arrow-up-down
+          - entity: binary_sensor.smart_234118_passenger_window
+            name: Passenger Window
+            icon: mdi:car-door
+          - entity: sensor.smart_234118_window_position_passenger
+            name: Passenger Position
+            icon: mdi:arrow-up-down
+          - entity: binary_sensor.smart_234118_rear_left_window
+            name: Rear Left Window
+            icon: mdi:car-door
+          - entity: sensor.smart_234118_window_position_driver_rear
+            name: Rear Left Position
+            icon: mdi:arrow-up-down
+          - entity: binary_sensor.smart_234118_rear_right_window
+            name: Rear Right Window
+            icon: mdi:car-door
+          - entity: sensor.smart_234118_window_position_passenger_rear
+            name: Rear Right Position
+            icon: mdi:arrow-up-down
+          - entity: binary_sensor.smart_234118_sunroof_open
+            name: Sunroof
+            icon: mdi:car-select
+          - entity: sensor.smart_234118_sunroof_position
+            name: Sunroof Position
+            icon: mdi:arrow-up-down
+          - entity: button.smart_234118_smart_close_windows
+            name: Close All Windows
+            icon: mdi:window-closed
+
+      # ──────────────────────────────────────────────
+      # Service & Maintenance
+      # ──────────────────────────────────────────────
+      - type: entities
+        title: Service & Maintenance
+        entities:
+          - entity: sensor.smart_234118_odometer
+            name: Odometer
+            icon: mdi:counter
+          - entity: sensor.smart_234118_days_to_service
+            name: Days to Service
+            icon: mdi:calendar-clock
+          - entity: sensor.smart_234118_distance_to_service
+            name: Distance to Service
+            icon: mdi:road-variant
+          - entity: sensor.smart_234118_engine_hours_to_service
+            name: Engine Hours to Service
+            icon: mdi:engine
+          - entity: sensor.smart_234118_service_warning
+            name: Service Warning
+            icon: mdi:alert-circle
+          - entity: sensor.smart_234118_washer_fluid_level
+            name: Washer Fluid
+            icon: mdi:wiper-wash
+          - entity: binary_sensor.smart_234118_brake_fluid_ok
+            name: Brake Fluid
+            icon: mdi:car-brake-fluid-level
+          - entity: sensor.smart_234118_engine_coolant_level
+            name: Engine Coolant
+            icon: mdi:coolant-temperature
+          - entity: sensor.smart_234118_current_firmware_version
+            name: Current Firmware
+            icon: mdi:cellphone-arrow-down
+          - entity: sensor.smart_234118_target_firmware_version
+            name: Target Firmware
+            icon: mdi:cellphone-arrow-up
+          - entity: binary_sensor.smart_234118_update_available
+            name: Update Available
+            icon: mdi:update
+          - entity: sensor.smart_234118_diagnostic_status
+            name: Diagnostic Status
+            icon: mdi:stethoscope
+          - entity: sensor.smart_234118_diagnostic_code
+            name: Diagnostic Code
+            icon: mdi:barcode

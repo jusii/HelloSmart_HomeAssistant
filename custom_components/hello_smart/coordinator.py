@@ -241,6 +241,13 @@ class SmartDataCoordinator(DataUpdateCoordinator[dict[str, VehicleData]]):
                     soc_data = await self._api.async_get_soc(account, vin)
                     if soc_data:
                         target_soc = soc_data.get("target_soc")
+                        # Supplement vehicle status with SOC endpoint data if available
+                        if soc_data.get("charge_voltage") is not None and status.charge_voltage is None:
+                            status.charge_voltage = soc_data["charge_voltage"]
+                        if soc_data.get("charge_current") is not None and status.charge_current is None:
+                            status.charge_current = soc_data["charge_current"]
+                        if soc_data.get("time_to_full") is not None and status.time_to_full is None:
+                            status.time_to_full = soc_data["time_to_full"]
                 except Exception:
                     _LOGGER.debug("SOC detail unavailable for %s", vin[:6] + "...", exc_info=True)
 
@@ -323,15 +330,17 @@ class SmartDataCoordinator(DataUpdateCoordinator[dict[str, VehicleData]]):
 
                 # Fetch trip journal
                 last_trip = None
+                total_trips = None
                 try:
-                    last_trip = await self._api.async_get_trip_journal(account, vin)
+                    last_trip, total_trips = await self._api.async_get_trip_journal(account, vin)
                 except Exception:
                     _LOGGER.debug("Trip journal unavailable for %s", vin[:6] + "...", exc_info=True)
 
                 # Fetch total distance
                 total_distance = None
+                total_distance_update_time = None
                 try:
-                    total_distance = await self._api.async_get_total_distance(account, vin)
+                    total_distance, total_distance_update_time = await self._api.async_get_total_distance(account, vin)
                 except Exception:
                     _LOGGER.debug("Total distance unavailable for %s", vin[:6] + "...", exc_info=True)
 
@@ -377,6 +386,36 @@ class SmartDataCoordinator(DataUpdateCoordinator[dict[str, VehicleData]]):
                 except Exception:
                     _LOGGER.debug("Plant number unavailable for %s", vin[:6] + "...", exc_info=True)
 
+                # Fetch vehicle ability (image URLs, color/trim config)
+                ability = None
+                vehicle_image_path = ""
+                try:
+                    ability = await self._api.async_get_vehicle_ability(
+                        account, vin, vehicle.model_code or ""
+                    )
+                    if ability:
+                        import os
+                        www_dir = self.hass.config.path("www", "hello_smart")
+                        if ability.images_path:
+                            dest_file = os.path.join(www_dir, f"{vin}_side.png")
+                            downloaded = await self._api.async_download_image(
+                                ability.images_path, dest_file
+                            )
+                            if downloaded:
+                                vehicle_image_path = f"/local/hello_smart/{vin}_side.png"
+                        if ability.interior_images_path:
+                            dest_interior = os.path.join(www_dir, f"{vin}_interior.png")
+                            await self._api.async_download_image(
+                                ability.interior_images_path, dest_interior
+                            )
+                        if ability.top_images_path:
+                            dest_top = os.path.join(www_dir, f"{vin}_top.png")
+                            await self._api.async_download_image(
+                                ability.top_images_path, dest_top
+                            )
+                except Exception:
+                    _LOGGER.debug("Vehicle ability unavailable for %s", vin[:6] + "...", exc_info=True)
+
             except Exception as err:
                 _LOGGER.warning(
                     "Failed to fetch status for vehicle %s: %s",
@@ -415,11 +454,15 @@ class SmartDataCoordinator(DataUpdateCoordinator[dict[str, VehicleData]]):
                 fragrance=fragrance,
                 last_trip=last_trip,
                 total_distance=total_distance,
+                total_distance_update_time=total_distance_update_time,
+                total_trips=total_trips,
                 geofence=geofence,
                 capabilities=capabilities,
                 energy_ranking=energy_ranking,
                 locker_secret=locker_secret,
                 fota_notification=fota_notification,
+                ability=ability,
+                vehicle_image_path=vehicle_image_path,
             )
 
         _LOGGER.debug("Updated data for %d vehicle(s)", len(result))

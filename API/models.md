@@ -308,5 +308,34 @@ Combined coordinator output — aggregates all of the above models.
 | `diagnostic` | `DiagnosticEntry` | Yes |
 | `energy_ranking` | `EnergyRanking` | Yes |
 | `fota_notification` | `FOTANotification` | Yes |
+| `ability` | `VehicleAbility` | Yes |
+| `vehicle_image_path` | `str` | Yes |
 | `total_distance` | `float` | Yes |
 | `plant_no` | `str` | Yes |
+
+---
+
+### `VehicleAbility`
+
+Vehicle visual configuration and remote control capabilities from the VC service.
+
+| Field | Type | Optional | Description |
+|-------|------|----------|-------------|
+| `images_path` | `str` | No | CDN URL for side-view image |
+| `top_images_path` | `str` | No | CDN URL for top-down image |
+| `battery_images_path` | `str` | No | CDN URL for battery image |
+| `interior_images_path` | `str` | No | CDN URL for interior image (may be empty) |
+| `color_code` | `str` | No | Exterior color code |
+| `color_name_mss` | `str` | No | Exterior color name |
+| `contrast_color_code` | `str` | No | Accent color code |
+| `contrast_color_name` | `str` | No | Accent color name |
+| `interior_color_name` | `str` | No | Interior color name |
+| `hub_code` | `str` | No | Hub/dealer code |
+| `hub_name` | `str` | No | Hub/dealer name |
+| `model_code_mss` | `str` | No | MSS model code |
+| `model_code_vdp` | `str` | No | VDP model code |
+| `model_name` | `str` | No | Model name |
+| `vehicle_name` | `str` | No | Internal vehicle name |
+| `vehicle_nickname` | `str` | No | User-assigned nickname |
+| `side_logo_light_name` | `str` | No | Side logo light style |
+| `license_plate_number` | `str` | No | Registration plate |

@@ -19,15 +19,21 @@ EU_AUTH_BASE_URL = "https://auth.smart.com"
 EU_CONTEXT_URL = "https://awsapi.future.smart.com"
 OTA_BASE_URL = "https://ota.srv.smart.com"
 
+# --- Vehicle Services (VC) Base URLs (for ability/image endpoints) ---
+VC_INTL_BASE_URL = "https://sg-app-api.smart.com/vc"
+VC_EU_BASE_URL = "https://vehicle.vbs.srv.smart.com"
+
 # --- URL Allowlist (FR-015) ---
 URL_ALLOWLIST: frozenset[str] = frozenset(
     {
         "api.ecloudeu.com",
         "apiv2.ecloudeu.com",
         "sg-app-api.smart.com",
+        "sg-app.smart.com",
         "auth.smart.com",
         "awsapi.future.smart.com",
         "ota.srv.smart.com",
+        "vehicle.vbs.srv.smart.com",
     }
 )
 
@@ -44,6 +50,7 @@ GIGYA_API_KEY = (
     "3_L94eyQ-wvJhWm7Afp1oBhfTGXZArUfSHHW9p9Pncg513hZELXsxCfMWHrF8f5P5a"
 )
 INTL_X_CA_KEY = "204587190"
+INTL_VC_APP_SECRET = "vxnzkHbpQrkKKQKmFBZlOnL780rjXLFT"
 
 # --- HMAC signing secrets (public app identifiers, not user secrets) ---
 EU_SIGNING_SECRET: bytes = base64.b64decode(
@@ -86,6 +93,12 @@ SENSITIVE_FIELDS: tuple[str, ...] = (
     "imei",
     "locker_secret",
     "secretSet",
+    "plate_no",
+    "engine_no",
+    "iccid",
+    "msisdn",
+    "ihu_id",
+    "tem_id",
 )
 
 # --- Command service IDs ---
@@ -109,6 +122,7 @@ API_SELECT_CAR_PATH = "/device-platform/user/session/update"
 API_TELEMATICS_COMMAND_PATH = "/remote-control/vehicle/telematics"
 API_CHARGING_RESERVATION_PATH = "/remote-control/charging/reservation"
 API_CLIMATE_SCHEDULE_PATH = "/remote-control/schedule"
+API_VC_ABILITY_PATH = "/vehicle/v1/ability"
 
 # --- API response codes ---
 API_CODE_SUCCESS = 1000
