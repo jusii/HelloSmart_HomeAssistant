@@ -1,5 +1,7 @@
 # Hello Smart — Home Assistant Integration
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=onpremcloudguy&repository=HelloSmart_HomeAssistant&category=integration)
+
 A custom Home Assistant integration for **Smart** electric vehicles (#1, #3, #5). Connects to the Smart cloud API to provide real-time vehicle status, charging data, trip history, and accessory information.
 
 ## Features
@@ -102,6 +104,10 @@ Full API reference with individual endpoint docs, authentication flows, request 
 | [Entity Mapping](API/entities.md) | How API data maps to HA entities |
 | [Endpoint Docs](API/endpoints/) | Individual endpoint documentation (22 files) |
 
+## Acknowledgements
+
+This project was inspired by [smarthashtag](https://github.com/DasBasti/smarthashtag) by [@DasBasti](https://github.com/DasBasti), which provided foundational research into the Smart API.
+
 ## License
 
-This project is provided as-is for personal use with Smart vehicles.
+This project is licensed under the [MIT License](LICENSE).

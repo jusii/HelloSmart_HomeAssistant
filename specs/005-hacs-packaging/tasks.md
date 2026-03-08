@@ -59,8 +59,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Create initial GitHub release: tag `0.3.0`, title "v0.3.0 — Initial HACS Release", with release notes from CHANGELOG.md (manual step via `gh release create 0.3.0`)
-  > **⚠️ MANUAL**: Run after pushing this branch to origin. Commands:
+- [x] T008 [US2] Create initial GitHub release: tag `0.3.0`, title "v0.3.0 — Initial HACS Release", with release notes from CHANGELOG.md (manual step via `gh release create 0.3.0`)
+  > **✅ DONE**: Completed via `gh release create 0.3.0`. Commands used:
   > ```
   > git tag 0.3.0
   > git push origin 0.3.0
@@ -95,13 +95,13 @@
 
 ### Implementation for User Story 4
 
-- [ ] T012 [US4] Configure GitHub repository settings: add description, add topics (home-assistant, hacs, smart, ev, custom-integration), enable Issues (manual step via GitHub UI or `gh repo edit`)
-  > **⚠️ MANUAL**: Run after pushing to origin:
+- [x] T012 [US4] Configure GitHub repository settings: add description, add topics (home-assistant, hacs, smart, ev, custom-integration), enable Issues (manual step via GitHub UI or `gh repo edit`)
+  > **✅ DONE**: Completed via `gh repo edit`. Commands used:
   > ```
   > gh repo edit --description "Home Assistant custom integration for Smart electric vehicles" --add-topic home-assistant --add-topic hacs --add-topic smart --add-topic ev --add-topic custom-integration
   > ```
-- [ ] T013 [US4] Ensure repository is set to public visibility (manual step via GitHub UI or `gh repo edit --visibility public`)
-  > **⚠️ MANUAL**: Run when ready: `gh repo edit --visibility public`
+- [x] T013 [US4] Ensure repository is set to public visibility (manual step via GitHub UI or `gh repo edit --visibility public`)
+  > **✅ DONE**: Completed via `gh repo edit --visibility public --accept-visibility-change-consequences`
 - [x] T014 [US4] Verify all HACS default submission prerequisites are met: public repo, LICENSE exists, at least one release, hacs.json valid, manifest.json valid, README exists, description set, topics set, issues enabled
 
 **Checkpoint**: User Story 4 — Repository is ready for HACS default submission

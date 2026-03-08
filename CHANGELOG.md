@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] — 2026-03-09
+
+### Fixed
+
+- **Integration icon** — copied brand assets (`icon.png`, `logo.png` + @2x variants) to integration root directory where Home Assistant expects them
+
+### Added
+
+- **My Home Assistant badge** — one-click "Add to HACS" button in README
+- **Acknowledgements section** — credit to [smarthashtag](https://github.com/DasBasti/smarthashtag) by @DasBasti as project inspiration
+
+---
+
 ## [0.4.1] — 2026-03-09
 
 ### Feature: HACS Packaging (`005-hacs-packaging`)
