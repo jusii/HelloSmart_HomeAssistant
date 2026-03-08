@@ -12,3 +12,20 @@ logger:
 
 # Minimal default config
 default_config:
+
+# Lovelace dashboards
+lovelace:
+  mode: storage
+  dashboards:
+    smart-vehicle:
+      mode: yaml
+      title: Smart Vehicle
+      icon: mdi:car
+      show_in_sidebar: true
+      filename: dashboards/smart-vehicle.yaml
+    smart-vehicle-basic:
+      mode: yaml
+      title: Smart Vehicle (Basic)
+      icon: mdi:car-outline
+      show_in_sidebar: true
+      filename: dashboards/smart-vehicle-basic.yaml

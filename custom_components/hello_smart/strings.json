@@ -114,7 +114,27 @@
       "relative_humidity": { "name": "Interior humidity" },
       "engine_hours_to_service": { "name": "Engine hours to service" },
       "service_warning": { "name": "Service warning" },
-      "battery_12v_state_of_health": { "name": "12V battery health" }
+      "battery_12v_state_of_health": { "name": "12V battery health" },
+      "color_name": { "name": "Colour" },
+      "color_code": { "name": "Colour code" },
+      "model_code": { "name": "Model code" },
+      "factory_code": { "name": "Factory code" },
+      "series_name": { "name": "Series" },
+      "vehicle_type": { "name": "Vehicle type" },
+      "mat_code": { "name": "Material code" },
+      "fuel_tank_capacity": { "name": "Fuel tank capacity" },
+      "ihu_platform": { "name": "IHU platform" },
+      "tbox_platform": { "name": "T-Box platform" },
+      "vehicle_photo_url": { "name": "Vehicle photo URL" },
+      "engine_status": { "name": "Engine status" },
+      "usage_mode": { "name": "Usage mode" },
+      "car_mode": { "name": "Car mode" },
+      "altitude": { "name": "Altitude" },
+      "last_trip_regenerated_energy": { "name": "Last trip regenerated energy" },
+      "last_trip_start_address": { "name": "Last trip start address" },
+      "last_trip_end_address": { "name": "Last trip end address" },
+      "total_trips": { "name": "Total trips" },
+      "vehicle_image_path": { "name": "Vehicle image" }
     },
     "binary_sensor": {
       "driver_door": { "name": "Driver door" },
@@ -140,6 +160,7 @@
       "vtm_enabled": { "name": "Theft monitoring" },
       "vtm_notification_enabled": { "name": "Theft alert notifications" },
       "vtm_geofence_alert": { "name": "Geofence breach alerts" },
+      "vtm_movement_alert": { "name": "Movement alert" },
       "locker_locked": { "name": "Locker lock" },
       "diagnostic_active": { "name": "Diagnostic alert" },
       "locker_secret_set": { "name": "Locker PIN configured" },
@@ -256,7 +277,7 @@
           "medium": "Medium",
           "high": "High"
         }
-      },
+      }
     }
   }
 }

@@ -73,6 +73,12 @@ Complete documentation of all GET API endpoints consumed by the Hello Smart Home
 | [Trip Journal V4](endpoints/trip-journal.md) | GET | `/geelyTCAccess/tcservices/vehicle/status/journalLogV4/{vin}` | Trip data with energy metrics |
 | [Total Distance](endpoints/total-distance.md) | GET | `/geelyTCAccess/tcservices/vehicle/status/getTotalDistanceByLabel/{vin}` | Cumulative odometer |
 
+### Vehicle Configuration (VC Service)
+
+| Endpoint | Method | Path | Description |
+|----------|--------|------|-------------|
+| [Vehicle Ability](endpoints/vehicle-ability.md) | GET | `/vehicle/v1/ability/{modelCode}/{vin}` | Remote capabilities, color-matched images (different host) |
+
 ### Vehicle Metadata
 
 | Endpoint | Method | Path | Description |
@@ -94,3 +100,4 @@ Complete documentation of all GET API endpoints consumed by the Hello Smart Home
 
 - [Data Models](models.md) — Enumerations, dataclasses, and type definitions
 - [Entity Mapping](entities.md) — How API data maps to Home Assistant entities
+- [APK API Audit](apk-api-audit.md) — Complete endpoint inventory from decompiled EU & INTL APKs (~360 endpoints each, with diff flags)

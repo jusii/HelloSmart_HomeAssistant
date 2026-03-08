@@ -13,8 +13,11 @@ Shared conventions across all Smart vehicle cloud API endpoints.
 | Vehicle data (EU & INTL) | `https://api.ecloudeu.com` | All vehicle GET/POST endpoints |
 | INTL session exchange | `https://apiv2.ecloudeu.com` | INTL auth step 3 only |
 | INTL login | `https://sg-app-api.smart.com` | INTL auth steps 1–2 |
+| INTL VC service | `https://sg-app-api.smart.com/vc` | Vehicle ability endpoint (uses Alibaba Cloud API Gateway signing) |
+| INTL image CDN | `https://sg-app.smart.com` | Color-matched vehicle images |
 | EU login (Gigya) | `https://auth.smart.com` | EU authentication |
 | EU context | `https://awsapi.future.smart.com` | EU session exchange |
+| EU VC service | `https://vehicle.vbs.srv.smart.com` | Vehicle ability endpoint (EU) |
 | OTA firmware | `https://ota.srv.smart.com` | OTA endpoint only |
 
 ---
@@ -63,6 +66,30 @@ signature = base64(hmac_sha1(signing_secret, payload))
 | Nonce format | Random hex | UUID v4 |
 | Content-Type | `application/json; charset=utf-8` | `application/json` |
 | Signing secret | Base64-encoded | Raw hex bytes |
+
+---
+
+### VC Signing (Alibaba Cloud API Gateway) {#vc-signing}
+
+The [Vehicle Ability](endpoints/vehicle-ability.md) endpoint uses a completely different signing scheme: **Alibaba Cloud API Gateway HMAC-SHA256**. This is implemented in `build_vc_signed_headers()` (separate from the standard `build_signed_headers()`).
+
+```
+string_to_sign = "GET\n{Accept}\n\n{Content-Type}\n{Date}\nx-ca-key:{key}\nx-ca-nonce:{nonce}\nx-ca-signature-method:HmacSHA256\nx-ca-timestamp:{ts}\n{path}"
+
+signature = base64(hmac_sha256(vc_app_secret, string_to_sign))
+```
+
+| Header | Description |
+|--------|-------------|
+| `x-ca-key` | App key from native JNI library |
+| `x-ca-nonce` | UUID v4 |
+| `x-ca-timestamp` | Epoch milliseconds |
+| `x-ca-signature-method` | `HmacSHA256` |
+| `x-ca-signature-headers` | Comma-separated sorted `x-ca-*` header names |
+| `x-ca-signature` | Base64 HMAC-SHA256 signature |
+| `Xs-Auth-Token` | `idToken` from INTL Gigya login |
+
+> The signature key pair is extracted from `libnative-lib.so` in the INTL APK via JNI functions `getAppKeyReleaseFromJni` and `getAppSecretReleaseFromJni`.
 
 ---
 

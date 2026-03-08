@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -29,6 +32,13 @@ PLATFORMS: list[Platform] = [
 type SmartConfigEntry = ConfigEntry[SmartDataCoordinator]
 
 
+FRONTEND_URL = f"/{DOMAIN}/frontend"
+FRONTEND_CARD_JS = "hello-smart-vehicle-card.js"
+FRONTEND_CHARGE_JS = "hello-smart-charge-card.js"
+FRONTEND_RESOURCE_URL = f"{FRONTEND_URL}/{FRONTEND_CARD_JS}"
+FRONTEND_CHARGE_URL = f"{FRONTEND_URL}/{FRONTEND_CHARGE_JS}"
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: SmartConfigEntry) -> bool:
     """Set up Hello Smart from a config entry."""
     coordinator = SmartDataCoordinator(hass, entry)
@@ -38,11 +48,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: SmartConfigEntry) -> boo
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    # Register the custom frontend card (once, shared across entries)
+    await _async_register_frontend(hass)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
 
     return True
+
+
+async def _async_register_frontend(hass: HomeAssistant) -> None:
+    """Register the custom Lovelace card JS as a static resource."""
+    if f"{DOMAIN}_frontend_registered" in hass.data:
+        return
+
+    frontend_dir = Path(__file__).parent / "frontend"
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(FRONTEND_URL, str(frontend_dir), cache_headers=False)]
+    )
+    add_extra_js_url(hass, FRONTEND_RESOURCE_URL)
+    add_extra_js_url(hass, FRONTEND_CHARGE_URL)
+
+    hass.data[f"{DOMAIN}_frontend_registered"] = True
 
 
 async def _async_options_updated(

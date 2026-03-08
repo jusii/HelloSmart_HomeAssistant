@@ -208,6 +208,13 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[SmartBinarySensorEntityDescription, ...] = (
         is_on_fn=lambda data: data.vtm.geofence_alert_enabled if data.vtm else False,
     ),
     SmartBinarySensorEntityDescription(
+        key="vtm_movement_alert",
+        translation_key="vtm_movement_alert",
+        icon="mdi:shield-alert-outline",
+        entity_registry_enabled_default=False,
+        is_on_fn=lambda data: data.vtm.movement_alert_enabled if data.vtm else False,
+    ),
+    SmartBinarySensorEntityDescription(
         key="locker_locked",
         translation_key="locker_locked",
         icon="mdi:lock",

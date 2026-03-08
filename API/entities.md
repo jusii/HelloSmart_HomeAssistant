@@ -62,6 +62,7 @@ How API data maps to Home Assistant entities.
 | `capability_count` | — | — | `len(capabilities.service_ids)` |
 | `washer_fluid_level` | — | — | `status.washer_fluid_level` |
 | `fota_pending_count` | — | — | `fota_notification.pending_count` |
+| `vehicle_image_path` | — | — | Local path to downloaded side-view image |
 
 ---
 
@@ -121,7 +122,7 @@ Entities are **dynamically hidden** when their data source returns `None`. The `
 
 | Platform | Count |
 |----------|-------|
-| Sensor | 53 |
+| Sensor | 54 |
 | Binary Sensor | 28 |
 | Device Tracker | 1 |
-| **Total** | **82** |
+| **Total** | **83** |

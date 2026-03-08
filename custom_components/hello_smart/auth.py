@@ -33,6 +33,7 @@ from .const import (
     INTL_IDENTITY_TYPE,
     INTL_OPERATOR_CODE,
     INTL_SIGNING_SECRET,
+    INTL_VC_APP_SECRET,
     INTL_VEHICLE_APP_ID,
     INTL_X_CA_KEY,
     INTL_API_BASE_URL,
@@ -92,6 +93,97 @@ def _create_sign(
         hmac.new(secret, payload.encode("utf-8"), hashlib.sha1).digest()
     ).decode()
     return signature
+
+
+def build_vc_signed_headers(
+    method: str,
+    url: str,
+    account: Account,
+) -> dict[str, str]:
+    """Build Alibaba Cloud API Gateway signed headers for VC endpoints.
+
+    The VC service (sg-app-api.smart.com/vc/) uses a different signing scheme
+    from the vehicle data API: standard Alibaba Cloud API Gateway HmacSHA256.
+    """
+    parsed = urlparse(url)
+    path = parsed.path
+    query = parsed.query
+
+    timestamp_ms = str(int(time.time() * 1000))
+    # HTTP Date header: e.g. "Sat, 08 Mar 2026 09:00:00 GMT"
+    date_str = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())
+    nonce = str(uuid.uuid4())
+
+    accept = "application/json;charset=UTF-8"
+    content_type = "application/json;charset=UTF-8"
+
+    # Build x-ca-* headers (sorted) for signature
+    ca_headers = {
+        "x-ca-key": INTL_X_CA_KEY,
+        "x-ca-nonce": nonce,
+        "x-ca-signature-method": "HmacSHA256",
+        "x-ca-timestamp": timestamp_ms,
+    }
+    # Sorted header names for X-Ca-Signature-Headers
+    sig_header_names = ",".join(sorted(ca_headers.keys()))
+
+    # String to sign per Alibaba Cloud API Gateway spec:
+    # METHOD\nAccept\nContent-MD5\nContent-Type\nDate\n
+    # [sorted x-ca-* headers as key:value\n]
+    # path[?query]
+    lines = [
+        method.upper(),
+        accept,
+        "",  # Content-MD5 (empty for GET)
+        content_type,
+        date_str,
+    ]
+    # Add sorted x-ca-* headers
+    for k in sorted(ca_headers.keys()):
+        lines.append(f"{k}:{ca_headers[k]}")
+    # Add path with query
+    resource = path
+    if query:
+        resource = f"{path}?{query}"
+    lines.append(resource)
+
+    string_to_sign = "\n".join(lines)
+
+    signature = base64.b64encode(
+        hmac.new(
+            INTL_VC_APP_SECRET.encode("utf-8"),
+            string_to_sign.encode("utf-8"),
+            hashlib.sha256,
+        ).digest()
+    ).decode()
+
+    headers = {
+        "accept": accept,
+        "content-type": content_type,
+        "date": date_str,
+        "user-agent": "ALIYUN-ANDROID-DEMO",
+        "x-ca-key": INTL_X_CA_KEY,
+        "x-ca-nonce": nonce,
+        "x-ca-timestamp": timestamp_ms,
+        "x-ca-signature-method": "HmacSHA256",
+        "x-ca-signature-headers": sig_header_names,
+        "x-ca-signature": signature,
+        "CA_VERSION": "1",
+    }
+
+    # Add x-smart-id (explicit in Retrofit annotation)
+    if account.api_user_id:
+        headers["x-smart-id"] = account.api_user_id
+
+    # Add authorization (session access token)
+    if account.api_access_token:
+        headers["authorization"] = account.api_access_token
+
+    # Xs-Auth-Token: idToken from INTL login (required by API gateway)
+    if account.id_token:
+        headers["Xs-Auth-Token"] = account.id_token
+
+    return headers
 
 
 def build_signed_headers(
@@ -363,6 +455,7 @@ async def async_login_intl(
     account.api_user_id = data.get("userId", "")
     account.api_client_id = data.get("clientId", "")
     account.access_token = intl_access_token
+    account.id_token = intl_id_token
     account.state = AuthState.AUTHENTICATED
 
     from datetime import datetime, timedelta

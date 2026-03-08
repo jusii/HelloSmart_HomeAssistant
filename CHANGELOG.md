@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] — 2026-03-08
+
+### Feature: Lovelace Vehicle Dashboard & Custom Cards (`004-lovelace-dashboard`)
+
+Added two custom Lovelace cards bundled with the integration (no HACS dependency), pre-built YAML dashboards for quick setup, and interactive lock/charge controls directly from the cards.
+
+### Added
+
+- **Vehicle HUD card** (`custom:hello-smart-vehicle-card`) — top-down vehicle image with door, window, trunk, hood, and sunroof overlays at physical positions; lock status row with per-door icons; interactive lock/unlock via header button and clickable lock icons; auto-detects vehicle (zero config for single-vehicle setups); device-registry-based entity lookup with compressed key support and SUFFIX_TO_TKEY fallback
+- **Charge Status card** (`custom:hello-smart-charge-card`) — battery level gauge with animated fill bar and color thresholds (green/orange/red); charging state header with icon/label for 6 states (not charging, preparing, AC, DC fast, paused, fully charged); info strip showing range, average consumption, and charger connection; live charging metrics section (power, voltage, current, time to full, range at full) shown only while charging; scheduled charging section with start/end times and target SOC; optional 12V battery section; pulse-glow animation on gauge while charging
+- **Frontend registration** — `async_register_static_paths` + `add_extra_js_url` auto-registers both card JS files from the `frontend/` directory; guard prevents duplicate registration across config entries
+- **Visual card editors** — both cards include `getConfigElement()` editors with auto-detection, vehicle picker (multi-vehicle only), and toggle options
+- **Enhanced dashboard** (`dashboards/smart-vehicle.yaml`) — Mushroom-based dashboard with 7 card groups: Hero, Battery & Range, Charging Status with interactive controls (SOC slider, schedule pickers, start/stop toggle), Lock & Security with picture-elements HUD diagram, Tyre Status in spatial wheel layout, Windows with close-all button, Service Information (odometer, maintenance, fluids, firmware, diagnostics). Smart brand CSS theming (#0078D4 accent) with dark-theme support
+- **Basic dashboard** (`dashboards/smart-vehicle-basic.yaml`) — standard HA entities/gauge cards covering all 7 card groups, no HACS dependencies required
+- **Dashboard assets** — extracted vehicle images from APK: `image_big_car_3x.png` (981×484), `vehicle_hud_1.png` (1112×668), `gsv_dev_ic_vehicle_main.png` (522×255), plus rendered vehicle previews
+- **Dashboard guide** (`dashboards/README.md`) — installation prerequisites, image setup, YAML import instructions, VIN customization, troubleshooting
+
+### Changed
+
+- **Lock entity availability** — `available_fn` now checks individual `door_lock_driver`/`passenger`/`driver_rear`/`passenger_rear` fields instead of empty `data.status.doors` dict; lock entity now created for vehicles with door lock binary sensors
+- **Lock state detection** — `_doors_locked()` reads individual door lock fields (1=locked, 0=unlocked) instead of the `doors` dict
+- **Brand icons** — updated all brand icon variants (icon.png, icon@2x.png, logo.png, logo@2x.png) with HelloSmartLogo.png resized to 256×256 and 512×512
+- **API documentation** — added vehicle ability endpoint docs, APK API audit notes
+
+### Fixed
+
+- Lock entity not created when `data.status.doors` was empty despite individual door lock sensors being available
+
+---
+
 ## [0.3.0] — 2026-03-08
 
 ### Feature: API Command Controls (`003-api-command-controls`)
