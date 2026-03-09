@@ -162,6 +162,17 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[SmartBinarySensorEntityDescription, ...] = (
             else False
         ),
     ),
+    SmartBinarySensorEntityDescription(
+        key="washer_fluid_low",
+        translation_key="washer_fluid_low",
+        icon="mdi:wiper-wash",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        is_on_fn=lambda data: (
+            data.status.washer_fluid_low
+            if data.status.washer_fluid_low is not None
+            else False
+        ),
+    ),
     # ── Accessories ───────────────────────────────────────────────
     SmartBinarySensorEntityDescription(
         key="fridge_active",

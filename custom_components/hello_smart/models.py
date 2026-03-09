@@ -25,31 +25,39 @@ class AuthState(enum.StrEnum):
 
 
 class ChargingState(enum.StrEnum):
-    """Human-readable charging states mapped from API chargerState 0–15."""
+    """Human-readable charging states mapped from API chargerState codes."""
 
     NOT_CHARGING = "not_charging"
-    CHARGE_PREPARATION = "charge_preparation"
     AC_CHARGING = "ac_charging"
     DC_CHARGING = "dc_charging"
-    CHARGE_PAUSED = "charge_paused"
-    FULLY_CHARGED = "fully_charged"
+    SUPER_CHARGING = "super_charging"
+    PLUGGED_NOT_CHARGING = "plugged_not_charging"
+    BOOST_CHARGING = "boost_charging"
+    WIRELESS_CHARGING = "wireless_charging"
 
 
 def charging_state_from_api(value: int) -> ChargingState:
-    """Map API chargerState integer (0–15) to ChargingState enum."""
-    if value == 0:
-        return ChargingState.NOT_CHARGING
-    if 1 <= value <= 3:
-        return ChargingState.CHARGE_PREPARATION
-    if 4 <= value <= 6:
-        return ChargingState.AC_CHARGING
-    if 7 <= value <= 9:
-        return ChargingState.DC_CHARGING
-    if 10 <= value <= 14:
-        return ChargingState.CHARGE_PAUSED
-    if value == 15:
-        return ChargingState.FULLY_CHARGED
-    return ChargingState.NOT_CHARGING
+    """Map API chargerState integer to ChargingState enum.
+
+    Values confirmed from APK TspEdgeRepository.ChargerState enum:
+      0  = not charging
+      2  = AC charging
+      15 = DC charging
+      24 = super charging (DC fast)
+      25 = plugged but not charging
+      28 = boost charging
+      30 = wireless charging
+    """
+    _MAP = {
+        0: ChargingState.NOT_CHARGING,
+        2: ChargingState.AC_CHARGING,
+        15: ChargingState.DC_CHARGING,
+        24: ChargingState.SUPER_CHARGING,
+        25: ChargingState.PLUGGED_NOT_CHARGING,
+        28: ChargingState.BOOST_CHARGING,
+        30: ChargingState.WIRELESS_CHARGING,
+    }
+    return _MAP.get(value, ChargingState.NOT_CHARGING)
 
 
 class PowerMode(enum.StrEnum):
@@ -161,7 +169,7 @@ class VehicleStatus:
     odometer: float | None = None
     days_to_service: int | None = None
     distance_to_service: float | None = None
-    washer_fluid_level: int | None = None
+    washer_fluid_low: bool | None = None
     brake_fluid_ok: bool | None = None
     # 12V battery
     battery_12v_voltage: float | None = None

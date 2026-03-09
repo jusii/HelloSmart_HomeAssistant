@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.4] — 2026-03-09
+
+### Fixed
+
+- **Charge lid polarity inverted** — charge lid AC/DC sensors always showed "closed"; APK `controlChargeLib()` confirms `"1"` = open, not `"0"` (`api.py`)
+- **Charger connected too restrictive** — only accepted `statusOfChargerConnection == "1"`; APK `getChargingPlugged()` shows values 1, 2, and 3 all mean plugged in (`api.py`)
+- **Charger state enum completely wrong** — used guessed sequential ranges (0, 1–3, 4–6, etc.); APK `TspEdgeRepository.ChargerState` has specific values: 0=not charging, 2=AC, 15=DC, 24=super, 25=plugged not charging, 28=boost, 30=wireless (`models.py`, `switch.py`, `hello-smart-charge-card.js`)
+- **Washer fluid exposed as meaningless raw integer** — `washerFluidLevelStatus` is a status code (0=normal, 1=low, 2=too low, 7=unknown) matching the tyre warning convention from APK `tyreStatusTranslate()`; changed from `sensor` to `binary_sensor` with `PROBLEM` device class (`sensor.py` → `binary_sensor.py`, `models.py`, `api.py`)
+- **Brake fluid always showing problem** — `_safe_bool("3")` returned False since only `"1"`/`"true"` = True; API returns `"3"` (= OK/high); switched to integer status interpretation matching washer fluid convention (`api.py`)
+
+---
+
 ## [0.4.3] — 2026-03-09
 
 ### Fixed

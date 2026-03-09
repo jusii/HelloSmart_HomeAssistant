@@ -52,7 +52,9 @@ def _charging_is_on(data: VehicleData) -> bool | None:
     if data.status.charging_state in (
         ChargingState.AC_CHARGING,
         ChargingState.DC_CHARGING,
-        ChargingState.CHARGE_PREPARATION,
+        ChargingState.SUPER_CHARGING,
+        ChargingState.BOOST_CHARGING,
+        ChargingState.WIRELESS_CHARGING,
     ):
         return True
     return False

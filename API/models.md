@@ -37,11 +37,12 @@ Vehicle charging status, mapped from `chargerState` integer.
 | Value | chargerState | Description |
 |-------|-------------|-------------|
 | `not_charging` | 0 | Not charging |
-| `charge_preparation` | 1–3 | Preparing to charge |
-| `ac_charging` | 4–6 | AC charging active |
-| `dc_charging` | 7–9 | DC fast charging active |
-| `charge_paused` | 10–14 | Charging paused |
-| `fully_charged` | 15 | Battery fully charged |
+| `ac_charging` | 2 | AC charging active |
+| `dc_charging` | 15 | DC fast charging active |
+| `super_charging` | 24 | Super charging (DC fast) |
+| `plugged_not_charging` | 25 | Plugged in but not charging |
+| `boost_charging` | 28 | Boost charging active |
+| `wireless_charging` | 30 | Wireless charging active |
 
 ### PowerMode
 
@@ -119,7 +120,7 @@ Comprehensive vehicle state from [Full Vehicle Status](endpoints/vehicle-status.
 | `odometer` | `float` | km | Yes |
 | `days_to_service` | `int` | days | Yes |
 | `distance_to_service` | `float` | km | Yes |
-| `washer_fluid_level` | `int` | — | Yes |
+| `washer_fluid_low` | `bool` | — | Yes |
 | `brake_fluid_ok` | `bool` | — | Yes |
 | `battery_12v_voltage` | `float` | V | Yes |
 | `battery_12v_level` | `float` | % | Yes |

@@ -510,7 +510,7 @@ views:
           - type: entities
             title: Fluid Levels
             entities:
-              - entity: sensor.smart_234118_washer_fluid_level
+              - entity: binary_sensor.smart_234118_washer_fluid_low
                 name: Washer Fluid
                 icon: mdi:wiper-wash
               - entity: binary_sensor.smart_234118_brake_fluid_ok

@@ -60,7 +60,7 @@ How API data maps to Home Assistant entities.
 | `backup_battery_voltage` | voltage | V | `telematics.backup_battery_voltage` |
 | `backup_battery_level` | battery | % | `telematics.backup_battery_level` |
 | `capability_count` | — | — | `len(capabilities.service_ids)` |
-| `washer_fluid_level` | — | — | `status.washer_fluid_level` |
+| `washer_fluid_low` | — | — | `status.washer_fluid_low` |
 | `fota_pending_count` | — | — | `fota_notification.pending_count` |
 | `vehicle_image_path` | — | — | Local path to downloaded side-view image |
 
@@ -87,6 +87,7 @@ How API data maps to Home Assistant entities.
 | `tyre_warning_rr` | problem | `status.tyre_warning_rr` | |
 | `telematics_connected` | connectivity | `telematics.connected` | |
 | `brake_fluid_ok` | problem | `!status.brake_fluid_ok` | Inverted — on = problem |
+| `washer_fluid_low` | problem | `status.washer_fluid_low` | on = low fluid |
 | `fridge_active` | running | `fridge.active` | |
 | `fragrance_active` | — | `fragrance.active` | |
 | `locker_open` | opening | `locker.open` | |

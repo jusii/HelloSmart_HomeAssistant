@@ -535,12 +535,6 @@ SENSOR_DESCRIPTIONS: tuple[SmartSensorEntityDescription, ...] = (
         value_fn=lambda data: len(data.capabilities.service_ids) if data.capabilities else 0,
     ),
     SmartSensorEntityDescription(
-        key="washer_fluid_level",
-        translation_key="washer_fluid_level",
-        icon="mdi:wiper-wash",
-        value_fn=lambda data: data.status.washer_fluid_level,
-    ),
-    SmartSensorEntityDescription(
         key="fota_pending_count",
         translation_key="fota_pending_count",
         icon="mdi:cellphone-arrow-down",

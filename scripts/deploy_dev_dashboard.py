@@ -50,7 +50,7 @@ key_map = {
     "sunroof_open": "sunroof",
     "days_to_service": "service_due_in",
     "distance_to_service": "service_due_distance",
-    "washer_fluid_level": "washer_fluid",
+    "washer_fluid_low": "washer_fluid",
     "brake_fluid_ok": "brake_fluid",
     "update_available": "firmware_update_available",
     "diagnostic_code": "diagnostic_trouble_code",

@@ -31,12 +31,13 @@ console.info(
  * Maps ChargingState enum values to icons, colors, and labels.
  */
 const CHARGING_STATES = {
-  not_charging:       { icon: "mdi:battery",              color: "#9E9E9E", label: "Not Charging" },
-  charge_preparation: { icon: "mdi:battery-clock",        color: "#FF9800", label: "Preparing" },
-  ac_charging:        { icon: "mdi:ev-plug-type2",        color: "#4CAF50", label: "AC Charging" },
-  dc_charging:        { icon: "mdi:ev-plug-ccs2",         color: "#2196F3", label: "DC Fast Charging" },
-  charge_paused:      { icon: "mdi:battery-minus",        color: "#FF9800", label: "Paused" },
-  fully_charged:      { icon: "mdi:battery-check",        color: "#4CAF50", label: "Fully Charged" },
+  not_charging:         { icon: "mdi:battery",              color: "#9E9E9E", label: "Not Charging" },
+  ac_charging:          { icon: "mdi:ev-plug-type2",        color: "#4CAF50", label: "AC Charging" },
+  dc_charging:          { icon: "mdi:ev-plug-ccs2",         color: "#2196F3", label: "DC Fast Charging" },
+  super_charging:       { icon: "mdi:lightning-bolt",        color: "#2196F3", label: "Super Charging" },
+  plugged_not_charging: { icon: "mdi:ev-plug-type2",        color: "#FF9800", label: "Plugged In" },
+  boost_charging:       { icon: "mdi:battery-charging-high", color: "#4CAF50", label: "Boost Charging" },
+  wireless_charging:    { icon: "mdi:battery-charging-wireless", color: "#4CAF50", label: "Wireless Charging" },
 };
 
 
@@ -165,7 +166,7 @@ class HelloSmartChargeCard extends HTMLElement {
     const battery12vLevel = this._getNumericByKey("battery_12v_level");
 
     // ── Derive display values ───────────────────────────────────────
-    const isCharging = chargingStatus && chargingStatus !== "not_charging" && chargingStatus !== "fully_charged";
+    const isCharging = chargingStatus && chargingStatus !== "not_charging" && chargingStatus !== "plugged_not_charging";
     const isPluggedIn = chargerConnected === "on";
     const stateInfo = CHARGING_STATES[chargingStatus] || CHARGING_STATES.not_charging;
 

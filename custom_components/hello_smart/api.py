@@ -918,7 +918,7 @@ class SmartAPI:
         # Parse charging state
         charger_state_raw = int(ev.get("chargerState", 0) or 0)
         charging_state = charging_state_from_api(charger_state_raw)
-        charger_connected = str(ev.get("statusOfChargerConnection", "0")) == "1"
+        charger_connected = str(ev.get("statusOfChargerConnection", "0")) in ("1", "2", "3")
 
         # Parse doors (values are typically "0"=closed, "1"=open)
         doors: dict[str, bool] = {}
@@ -1007,8 +1007,18 @@ class SmartAPI:
         odometer = _safe_float(maintenance_raw.get("odometer"))
         days_to_service = _safe_int(maintenance_raw.get("daysToService"))
         distance_to_service = _safe_float(maintenance_raw.get("distanceToService"))
-        washer_fluid_level = _safe_int(maintenance_raw.get("washerFluidLevelStatus"))
-        brake_fluid_ok = _safe_bool(maintenance_raw.get("brakeFluidLevelStatus"))
+
+        washer_val = _safe_int(maintenance_raw.get("washerFluidLevelStatus"))
+        if washer_val is None or washer_val == 7:
+            washer_fluid_low = None
+        else:
+            washer_fluid_low = washer_val in (1, 2)
+
+        brake_val = _safe_int(maintenance_raw.get("brakeFluidLevelStatus"))
+        if brake_val is None or brake_val == 7:
+            brake_fluid_ok = None
+        else:
+            brake_fluid_ok = brake_val not in (1, 2)
 
         # 12V battery from maintenanceStatus.mainBatteryStatus
         main_battery = maintenance_raw.get("mainBatteryStatus", {})
@@ -1152,13 +1162,13 @@ class SmartAPI:
         )
         charge_lid_ac_raw = ev.get("chargeLidAcStatus")
         charge_lid_ac_open = (
-            int(charge_lid_ac_raw) == 0
+            int(charge_lid_ac_raw) != 0
             if charge_lid_ac_raw is not None
             else None
         )
         charge_lid_dc_raw = ev.get("chargeLidDcAcStatus")
         charge_lid_dc_open = (
-            int(charge_lid_dc_raw) == 0
+            int(charge_lid_dc_raw) != 0
             if charge_lid_dc_raw is not None
             else None
         )
@@ -1202,7 +1212,7 @@ class SmartAPI:
             odometer=odometer,
             days_to_service=days_to_service,
             distance_to_service=distance_to_service,
-            washer_fluid_level=washer_fluid_level,
+            washer_fluid_low=washer_fluid_low,
             brake_fluid_ok=brake_fluid_ok,
             battery_12v_voltage=battery_12v_voltage,
             battery_12v_level=battery_12v_level,

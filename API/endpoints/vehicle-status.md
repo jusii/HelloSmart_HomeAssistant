@@ -149,8 +149,8 @@ Standard [signed headers](../common-patterns.md#required-headers) with `authoriz
 | `odometer` | string → float | km | Total distance driven |
 | `daysToService` | string → int | days | Days until next service |
 | `distanceToService` | string → float | km | Distance until next service |
-| `brakeFluidLevelStatus` | string → bool | — | `"3"` = OK |
-| `washerFluidLevelStatus` | string → int | — | Washer fluid level indicator |
+| `brakeFluidLevelStatus` | string → bool | — | Fluid status: `0`=normal, `1`=low, `2`=too low, `3`=high (OK), `7`=unknown |
+| `washerFluidLevelStatus` | string → bool | — | Fluid status: `0`=normal, `1`=low, `2`=too low, `3`=high (OK), `7`=unknown |
 
 ### Tyre Data
 
@@ -198,11 +198,12 @@ Standard [signed headers](../common-patterns.md#required-headers) with `authoriz
 | `chargerState` Value | ChargingState Enum |
 |---------------------|-------------------|
 | `0` | `not_charging` |
-| `1–3` | `charge_preparation` |
-| `4–6` | `ac_charging` |
-| `7–9` | `dc_charging` |
-| `10–14` | `charge_paused` |
-| `15` | `fully_charged` |
+| `2` | `ac_charging` |
+| `15` | `dc_charging` |
+| `24` | `super_charging` |
+| `25` | `plugged_not_charging` |
+| `28` | `boost_charging` |
+| `30` | `wireless_charging` |
 
 ---
 
@@ -227,13 +228,13 @@ Returns: [`VehicleStatus`](../models.md#vehiclestatus)
 | `battery_12v_level` | sensor | battery |
 | `days_to_service` | sensor | duration |
 | `distance_to_service` | sensor | distance |
-| `washer_fluid_level` | sensor | — |
 | `power_mode` | sensor | enum |
 | `driver_door` / `passenger_door` / etc. | binary_sensor | door |
 | `driver_window` / etc. | binary_sensor | window |
 | `charger_connected` | binary_sensor | plug |
 | `tyre_warning_*` | binary_sensor | problem |
 | `brake_fluid_ok` | binary_sensor | problem |
+| `washer_fluid_low` | binary_sensor | problem |
 | `location` | device_tracker | — |
 
 ---
