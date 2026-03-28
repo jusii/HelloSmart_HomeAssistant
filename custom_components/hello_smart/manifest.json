@@ -3,7 +3,7 @@
   "name": "Hello Smart",
   "codeowners": ["@onpremcloudguy"],
   "config_flow": true,
-  "dependencies": ["frontend", "http"],
+  "dependencies": ["frontend", "http", "lovelace"],
   "documentation": "https://github.com/onpremcloudguy/HelloSmart_HomeAssistant",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/onpremcloudguy/HelloSmart_HomeAssistant/issues",
