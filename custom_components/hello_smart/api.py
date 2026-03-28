@@ -628,7 +628,7 @@ class SmartAPI:
         """Send a vehicle command via PUT to the telematics endpoint.
 
         The JSON body is serialized with no spaces per API contract C-001.
-        Handles both direct {success: true} and wrapped {code: 1000, data: {success: true}} responses.
+        The response has success/message at the top level of the envelope.
         """
         base_url = self._get_base_url(account)
         url = f"{base_url}{API_TELEMATICS_COMMAND_PATH}/{vin}"
@@ -658,12 +658,19 @@ class SmartAPI:
             if code == API_CODE_TOKEN_EXPIRED:
                 raise TokenExpiredError("API code 1402: token expired")
 
-        # Handle both response formats
-        if "data" in data and isinstance(data["data"], dict):
+        _LOGGER.debug("Command %s response: %s", service_id, data)
+
+        # The standard API envelope has success/message at the top level:
+        #   {"code": 1000, "data": {...}, "success": true, "message": "..."}
+        # Check top-level first, then fall back to nested data.data
+        if "success" in data:
+            success = data["success"]
+            error_msg = data.get("message")
+        elif "data" in data and isinstance(data["data"], dict):
             success = data["data"].get("success", False)
             error_msg = data["data"].get("message")
         else:
-            success = data.get("success", False)
+            success = False
             error_msg = data.get("message")
 
         return CommandResult(
