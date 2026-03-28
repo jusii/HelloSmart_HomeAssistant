@@ -17,7 +17,7 @@
  *   show_12v: false        # show 12V battery info (default: false)
  */
 
-const CHARGE_CARD_VERSION = "1.0.1";
+const CHARGE_CARD_VERSION = "1.1.0";
 
 /* eslint-disable no-console */
 console.info(
@@ -49,6 +49,7 @@ class HelloSmartChargeCard extends HTMLElement {
     this._hass = null;
     this._keyMap = {};
     this._deviceId = null;
+    this._deviceEntityCount = 0;
     this._connected = false;
   }
 
@@ -127,9 +128,19 @@ class HelloSmartChargeCard extends HTMLElement {
     const deviceId = configEntry.device_id || configEntry.di;
     if (!deviceId) return;
 
-    if (this._deviceId === deviceId && Object.keys(this._keyMap).length > 0) return;
+    // Count device entities in registry to detect when new entities appear
+    let deviceEntityCount = 0;
+    for (const entry of Object.values(entityReg)) {
+      const eid = entry.device_id || entry.di;
+      const epl = entry.platform || entry.pl;
+      if (eid === deviceId && epl === "hello_smart") deviceEntityCount++;
+    }
+
+    // Only rebuild if device changed or entity count changed
+    if (this._deviceId === deviceId && this._deviceEntityCount === deviceEntityCount && Object.keys(this._keyMap).length > 0) return;
 
     this._deviceId = deviceId;
+    this._deviceEntityCount = deviceEntityCount;
     this._keyMap = {};
 
     for (const [entityId, entry] of Object.entries(entityReg)) {

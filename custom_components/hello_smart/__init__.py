@@ -44,7 +44,7 @@ FRONTEND_RESOURCE_URL = f"{FRONTEND_URL}/{FRONTEND_CARD_JS}"
 FRONTEND_CHARGE_URL = f"{FRONTEND_URL}/{FRONTEND_CHARGE_JS}"
 
 # Version from manifest.json for cache-busting
-_FRONTEND_VERSION = "0.5.0"
+_FRONTEND_VERSION = "0.5.1"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:

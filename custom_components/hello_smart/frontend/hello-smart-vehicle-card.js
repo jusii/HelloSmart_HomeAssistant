@@ -18,7 +18,7 @@
  *   show_locks: true                                  # show lock status row (default: true)
  */
 
-const CARD_VERSION = "1.2.1";
+const CARD_VERSION = "1.3.0";
 
 /* eslint-disable no-console */
 console.info(
@@ -73,6 +73,7 @@ class HelloSmartVehicleCard extends HTMLElement {
     // Map of translation_key → entity_id, built from device registry
     this._keyMap = {};
     this._deviceId = null;
+    this._deviceEntityCount = 0;
     this._connected = false;
   }
 
@@ -166,10 +167,19 @@ class HelloSmartVehicleCard extends HTMLElement {
       return;
     }
 
-    // Only rebuild if device changed
-    if (this._deviceId === deviceId && Object.keys(this._keyMap).length > 0) return;
+    // Count device entities in registry to detect when new entities appear
+    let deviceEntityCount = 0;
+    for (const entry of Object.values(entityReg)) {
+      const eid = entry.device_id || entry.di;
+      const epl = entry.platform || entry.pl;
+      if (eid === deviceId && epl === "hello_smart") deviceEntityCount++;
+    }
+
+    // Only rebuild if device changed or entity count changed
+    if (this._deviceId === deviceId && this._deviceEntityCount === deviceEntityCount && Object.keys(this._keyMap).length > 0) return;
 
     this._deviceId = deviceId;
+    this._deviceEntityCount = deviceEntityCount;
     this._keyMap = {};
 
     for (const [entityId, entry] of Object.entries(entityReg)) {
