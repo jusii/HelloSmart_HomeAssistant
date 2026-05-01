@@ -32,6 +32,7 @@ URL_ALLOWLIST: frozenset[str] = frozenset(
         "sg-app.smart.com",
         "auth.smart.com",
         "awsapi.future.smart.com",
+        "app.id.smart.com",
         "ota.srv.smart.com",
         "vehicle.vbs.srv.smart.com",
     }
@@ -49,6 +50,10 @@ INTL_OPERATOR_CODE = "SMART-ISRAEL"
 GIGYA_API_KEY = (
     "3_L94eyQ-wvJhWm7Afp1oBhfTGXZArUfSHHW9p9Pncg513hZELXsxCfMWHrF8f5P5a"
 )
+# Gigya socialize endpoint for fetching gmid/ucid (used to bootstrap a
+# Gigya session before posting accounts.login).
+EU_GIGYA_SOCIALIZE_BASE = "https://socialize.eu1.gigya.com"
+
 INTL_X_CA_KEY = "204587190"
 INTL_VC_APP_SECRET = "vxnzkHbpQrkKKQKmFBZlOnL780rjXLFT"
 
@@ -65,6 +70,16 @@ INTL_IDENTITY_TYPE = "smart-israel"
 # --- Device ID lengths ---
 EU_DEVICE_ID_LENGTH = 16
 INTL_DEVICE_ID_LENGTH = 32
+
+# --- EU OIDC webview User-Agent ---
+# Smart's API gateway (awsapi.future.smart.com) rejects requests with no UA or
+# with the iOS-app UA used elsewhere; the OIDC redirect chain only accepts a
+# browser-shaped UA matching what the Hello Smart Android app's webview sends.
+EU_WEBVIEW_USER_AGENT = (
+    "Mozilla/5.0 (Linux; Android 14; SM-S911B) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0.0.0 Mobile Safari/537.36"
+)
 
 # --- Accept header used in signing ---
 ACCEPT_HEADER = "application/json;responseformat=3"
